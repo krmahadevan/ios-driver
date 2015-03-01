@@ -15,8 +15,9 @@ package org.uiautomation.ios.client.uiamodels.impl;
 
 import com.google.common.collect.ImmutableMap;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
-import org.json.JSONObject;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriverException;
@@ -158,7 +159,7 @@ public class RemoteUIAElement extends RemoteIOSObject implements UIAElement {
   }
 
   @Override
-  public JSONObject logElementTree(File screenshot, boolean translation) throws Exception {
+  public JsonObject logElementTree(File screenshot, boolean translation) throws Exception {
     WebDriverLikeCommand command = WebDriverLikeCommand.TREE;
     Path
         p =
@@ -166,7 +167,7 @@ public class RemoteUIAElement extends RemoteIOSObject implements UIAElement {
     return logElementTree(screenshot, translation, p, command, getDriver());
   }
 
-  public JSONObject logElementTree(File screenshot, boolean translation, Path path,
+  public JsonObject logElementTree(File screenshot, boolean translation, Path path,
                                    WebDriverLikeCommand command,
                                    RemoteWebDriver driver) {
 
@@ -174,11 +175,13 @@ public class RemoteUIAElement extends RemoteIOSObject implements UIAElement {
                                                 ImmutableMap
                                                     .of("attachScreenshot", screenshot != null,
                                                         "translation", translation));
-    JSONObject log = commandExecutor.execute(request);
+    JsonObject log = commandExecutor.execute(request);
     if (screenshot != null) {
-      JSONObject screen = log.optJSONObject("screenshot");
-      String content = screen.optString("64encoded");
-      createFileFrom64EncodedString(screenshot, content);
+      JsonElement ssraw = log.get ("screenshot");
+      if (ssraw.isJsonObject ()) {
+        String content = ssraw.getAsJsonObject ().get ("64encoded").getAsString ();
+        createFileFrom64EncodedString(screenshot, content);
+      }
     }
     log.remove("screenshot");
     return log;

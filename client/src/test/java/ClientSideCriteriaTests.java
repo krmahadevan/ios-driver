@@ -18,10 +18,11 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,17 +37,17 @@ public class ClientSideCriteriaTests {
   ClientSideCriteriaFactory factory;
 
   @BeforeClass
-  public void setup() throws IOException, JSONException {
+  public void setup() throws IOException {
     InputStream is = ClientSideCriteriaTests.class.getResourceAsStream("/ClientSideL10N.json");
 
     StringWriter writer = new StringWriter();
     IOUtils.copy(is, writer, "UTF-8");
-    JSONArray json = new JSONArray(writer.toString());
+    JsonArray json = new Gson().fromJson (writer.toString (), JsonElement.class).getAsJsonArray ();
     Map<String, String> content = new HashMap<String, String>();
-    for (int i = 0; i < json.length(); i++) {
-      JSONObject entry = json.getJSONObject(i);
-      String key = (String) entry.keys().next();
-      content.put(key, entry.getString(key));
+    for (int i = 0; i < json.size (); i++) {
+      JsonObject entry = json.get (i).getAsJsonObject ();
+      Map.Entry<String, JsonElement> e =  entry.entrySet ().iterator ().next();
+      content.put(e.getKey (), e.getValue ().getAsString ());
     }
 
     factory = new ClientSideCriteriaFactory(content);
@@ -54,7 +55,7 @@ public class ClientSideCriteriaTests {
   }
 
   @Test
-  public void clienSideMapping() throws JSONException {
+  public void clienSideMapping() {
     NameCriteria c = factory.nameCriteria("abc", L10NStrategy.clientL10N,MatchingStrategy.exact);
     Assert.assertEquals(c.getValue(), "abc localisé.");
   }

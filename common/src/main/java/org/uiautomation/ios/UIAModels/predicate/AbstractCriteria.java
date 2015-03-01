@@ -17,34 +17,34 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.InvalidSelectorException;
 import org.openqa.selenium.WebDriverException;
 
 public abstract class AbstractCriteria implements Criteria {
 
-  public static <T extends Criteria> T parse(JSONObject serialized) throws Exception {
+  public static <T extends Criteria> T parse(JsonObject serialized) throws Exception {
     return parse(serialized, null);
   }
 
   @SuppressWarnings("unchecked")
-  public static <T extends Criteria> T parse(JSONObject serialized, CriteriaDecorator decorator) {
+  public static <T extends Criteria> T parse(JsonObject serialized, CriteriaDecorator decorator) {
     try {
-      int nbKeys = serialized.length();
+      int nbKeys = serialized.entrySet ().size ();
       switch (nbKeys) {
       case KEYS_IN_EMPTY_CRITERIA:
         return (T) new EmptyCriteria();
       case KEYS_IN_COMPOSED_CRITERIA:
-        String key = (String) serialized.keys().next();
+        String key = (String) serialized.entrySet ().iterator ().next().getKey ();
         CompositionType type = CompositionType.valueOf(key);
         return (T) buildComposedCriteria(serialized, type, decorator);
       case KEYS_IN_LOCATION_CRITERIA:
-        int x = serialized.getInt("x");
-        int y = serialized.getInt("y");
+        int x = serialized.get("x").getAsInt ();
+        int y = serialized.get("y").getAsInt ();
         return (T) buildLocationCriteria(serialized, x, y, decorator);
       case KEYS_IN_PROPERTY_CRITERIA:
-        String method = serialized.getString("method");
+        String method = serialized.get("method").getAsString ();
         String tmp = method.substring(0, 1).toUpperCase() + method.toLowerCase().substring(1) + "Criteria";
         String clazz = AbstractCriteria.class.getPackage().getName() + "." + tmp;
         Class<? extends PropertyEqualCriteria> c = (Class<? extends PropertyEqualCriteria>) Class.forName(clazz);
@@ -63,22 +63,22 @@ public abstract class AbstractCriteria implements Criteria {
   private static final int KEYS_IN_PROPERTY_CRITERIA = 4;
   private static final int KEYS_IN_LOCATION_CRITERIA = 2;
 
-  private static LocationCriteria buildLocationCriteria(JSONObject serialized, int x, int y, CriteriaDecorator decorator) {
+  private static LocationCriteria buildLocationCriteria(JsonObject serialized, int x, int y, CriteriaDecorator decorator) {
     LocationCriteria res = new LocationCriteria(x, y);
     res.addDecorator(decorator);
     return res;
   }
 
-  private static ComposedCriteria buildComposedCriteria(JSONObject serialized, CompositionType type,
+  private static ComposedCriteria buildComposedCriteria(JsonObject serialized, CompositionType type,
       CriteriaDecorator decorator) throws Exception {
-    JSONArray array = serialized.getJSONArray(type.toString());
-    if (type == CompositionType.NOT && array.length() != 1) {
+    JsonArray array = serialized.get (type.toString ()).getAsJsonArray ();
+    if (type == CompositionType.NOT && array.size () != 1) {
       throw new InvalidSelectorException("negative criteria apply to 1 criteria only " + serialized);
     }
     List<Criteria> criterias = new ArrayList<Criteria>();
 
-    for (int i = 0; i < array.length(); i++) {
-      JSONObject c = array.getJSONObject(i);
+    for (int i = 0; i < array.size (); i++) {
+        JsonObject c = array.get (i).getAsJsonObject ();
       Criteria crit = parse(c, decorator);
       criterias.add(crit);
     }
@@ -93,11 +93,11 @@ public abstract class AbstractCriteria implements Criteria {
     return crit;
   }
 
-  private static PropertyEqualCriteria buildPropertyBaseCriteria(JSONObject serialized,
+  private static PropertyEqualCriteria buildPropertyBaseCriteria(JsonObject serialized,
       Class<? extends PropertyEqualCriteria> clazz, CriteriaDecorator decorator) throws Exception {
-    String expected = serialized.getString("expected");
-    String matching = serialized.getString("matching");
-    String l10n = serialized.getString("l10n");
+    String expected = serialized.get ("expected").getAsString ();
+    String matching = serialized.get ("matching").getAsString ();
+    String l10n = serialized.get("l10n").getAsString ();
 
     Object[] args = new Object[] { expected, L10NStrategy.valueOf(l10n), MatchingStrategy.valueOf(matching) };
     Class<?>[] argsClass = new Class[] { String.class, L10NStrategy.class, MatchingStrategy.class };

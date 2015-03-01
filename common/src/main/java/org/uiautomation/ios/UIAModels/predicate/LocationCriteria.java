@@ -13,9 +13,7 @@
  */
 package org.uiautomation.ios.UIAModels.predicate;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.openqa.selenium.WebDriverException;
+import com.google.gson.JsonObject;
 
 public class LocationCriteria extends DecorableCriteria {
 
@@ -35,15 +33,11 @@ public class LocationCriteria extends DecorableCriteria {
   }
 
   @Override
-  public JSONObject stringify() {
-    JSONObject res = new JSONObject();
-    try {
-      res.put("x", x);
-      res.put("y", y);
-    } catch (JSONException e) {
-      throw new WebDriverException(e);
-    }
-    return res;
+  public JsonObject stringify () {
+      JsonObject res = new JsonObject ();
+      res.addProperty ("x", x);
+      res.addProperty ("y", y);
+      return res;
   }
 
 }

@@ -14,7 +14,8 @@
 
 package org.uiautomation.ios.communication;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.uiautomation.ios.IOSCapabilities;
@@ -39,13 +40,15 @@ public class IOSCapabilitiesTests {
 
   @Test(groups = {"capabilitiesMappingIsWrong", "broken"})
   public void propertiesAreAlignedWithUIAutomation() throws Exception {
-    IOSCapabilities ipad = new IOSCapabilities(new JSONObject(ipadFromInstruments));
+    Gson gson = new Gson ();
+
+    IOSCapabilities ipad = new IOSCapabilities(gson.fromJson (ipadFromInstruments, JsonElement.class).getAsJsonObject ());
     Assert.assertEquals(ipad.getDevice(), DeviceType.ipad);
     Assert.assertEquals(ipad.getLanguage(), "de");
     Assert.assertEquals(ipad.getLocale(), "fr_CA");
     Assert.assertEquals(ipad.getSDKVersion(), "5.1");
 
-    IOSCapabilities iphone = new IOSCapabilities(new JSONObject(iphoneFromInstruments));
+    IOSCapabilities iphone = new IOSCapabilities(gson.fromJson (iphoneFromInstruments, JsonElement.class).getAsJsonObject ());
     Assert.assertEquals(iphone.getDevice(), DeviceType.iphone);
     Assert.assertEquals(iphone.getLanguage(), "de");
     Assert.assertEquals(iphone.getLocale(), "fr_CA");

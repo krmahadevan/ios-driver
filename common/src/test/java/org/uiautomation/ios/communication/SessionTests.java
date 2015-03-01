@@ -18,9 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,45 +29,46 @@ import org.uiautomation.ios.IOSCapabilities;
 
 public class SessionTests {
 
-  private JSONObject empty = new JSONObject();
-  private JSONObject simple1 = new JSONObject();
-  private JSONObject array = new JSONObject();
+  private JsonObject empty = new JsonObject();
+  private JsonObject simple1 = new JsonObject();
+  private JsonObject array = new JsonObject();
 
 
   @BeforeClass
-  public void setup() throws JSONException {
-    simple1.put("boolean", true);
-    simple1.put("string", "abc");
+  public void setup() {
+    simple1.addProperty ("boolean", true);
+    simple1.addProperty ("string", "abc");
 
-    array.put("boolean", true);
-    array.put("string", "abc");
-    JSONArray a = new JSONArray();
-    a.put("a1");
-    a.put("a2");
-    a.put("a3");
-    array.put("array", a);
+    array.addProperty ("boolean", true);
+    array.addProperty ("string", "abc");
+    JsonArray a = new JsonArray ();
+    Gson gson = new Gson ();
+    a.add(gson.fromJson ("a1", JsonElement.class));
+    a.add(gson.fromJson ("a2", JsonElement.class));
+    a.add(gson.fromJson ("a3", JsonElement.class));
+    array.add("array", a);
 
   }
 
   @Test
-  public void empty() throws JSONException {
+  public void empty() {
     Map<String, Object> decoded = new IOSCapabilities(empty).getRawCapabilities();
     Assert.assertTrue(decoded.isEmpty());
   }
 
 
   @Test
-  public void simple1() throws JSONException {
+  public void simple1() {
     Map<String, Object> decoded = new IOSCapabilities(simple1).getRawCapabilities();
-    Assert.assertEquals(decoded.size(), simple1.length());
+    Assert.assertEquals(decoded.size(), simple1.entrySet ().size ());
     Assert.assertEquals(decoded.get("boolean"), true);
     Assert.assertEquals(decoded.get("string"), "abc");
   }
 
   @Test
-  public void array() throws JSONException {
+  public void array() {
     Map<String, Object> decoded = new IOSCapabilities(array).getRawCapabilities();
-    Assert.assertEquals(decoded.size(), array.length());
+    Assert.assertEquals(decoded.size(), array.entrySet ().size ());
     Assert.assertEquals(decoded.get("boolean"), true);
     Assert.assertEquals(decoded.get("string"), "abc");
     Assert.assertTrue(decoded.get("array") instanceof List);

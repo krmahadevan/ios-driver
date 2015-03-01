@@ -13,8 +13,8 @@
  */
 package org.uiautomation.ios.communication;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriverException;
@@ -31,10 +31,10 @@ import java.util.Set;
 
 // TODO freynaud remove the findElements related ones.
 public enum WebDriverLikeCommand {
-  STATUS("GET", "/status", JSONObject.class),
+  STATUS("GET", "/status", JsonObject.class),
   NEW_SESSION("POST", "/session", String.class),
-  SESSIONS("GET", "/sessions", JSONArray.class),
-  GET_SESSION("GET", "/session/:sessionId", JSONObject.class),
+  SESSIONS("GET", "/sessions", JsonArray.class),
+  GET_SESSION("GET", "/session/:sessionId", JsonObject.class),
   DELETE_SESSION("DELETE", "/session/:sessionId", null),
   SET_TIMEOUT("POST", "/session/:sessionId/timeouts", Void.class),
   SET_SCRIPT_TIMEOUT("POST", "/session/:sessionId/timeouts/async_script", Void.class),
@@ -65,11 +65,11 @@ public enum WebDriverLikeCommand {
   // GET /session/:sessionId/window/:windowHandle/position
   // POST /session/:sessionId/window/:windowHandle/maximize
 
-  GET_COOKIE("GET", "/session/:sessionId/cookie", JSONObject.class),
+  GET_COOKIE("GET", "/session/:sessionId/cookie", JsonObject.class),
   //POST /session/:sessionId/cookie
   DELETE_COOKIE("DELETE", "/session/:sessionId/cookie", Void.class),
   DELETE_COOKIE_BY_NAME("DELETE", "/session/:sessionId/cookie/:name", void.class),
-  SOURCE("GET", "/session/:sessionId/source", JSONObject.class),
+  SOURCE("GET", "/session/:sessionId/source", JsonObject.class),
   TITLE("GET", "/session/:sessionId/title", String.class),
   ELEMENT_ROOT("POST", "/session/:sessionId/element", UIAElement.class),
   ELEMENTS_ROOT("POST", "/session/:sessionId/elements", UIAElementArray.class),
@@ -96,7 +96,7 @@ public enum WebDriverLikeCommand {
   CSS("GET", "/session/:sessionId/element/:reference/css/:name", String.class),
   SET_ORIENTATION("POST", "/session/:sessionId/orientation", Void.class),
   GET_ORIENTATION("GET", "/session/:sessionId/orientation", Orientation.class),
-  GET_ALERT_TEXT("GET", "/session/:sessionId/alert_text", JSONObject.class),
+  GET_ALERT_TEXT("GET", "/session/:sessionId/alert_text", JsonObject.class),
   SET_ALERT_TEXT("POST", "/session/:sessionId/alert_text", Void.class),
   ACCEPT_ALERT("POST", "/session/:sessionId/accept_alert", Void.class),
   DISMISS_ALERT("POST", "/session/:sessionId/dismiss_alert", Void.class),
@@ -148,7 +148,7 @@ public enum WebDriverLikeCommand {
 
   GET_TIMEOUT("GET", "/session/:sessionId/timeouts", Integer.class),
   TREE("GET", "/session/:sessionId/element/:reference/tree", String.class),
-  TREE_ROOT("GET", "/session/:sessionId/tree", JSONObject.class),
+  TREE_ROOT("GET", "/session/:sessionId/tree", JsonObject.class),
   RECT("GET", "/session/:sessionId/element/:reference/rect", UIARect.class),
   KEYBOARD("GET", "/session/:sessionId/uiaApplication/:reference/keyboard", UIAKeyboard.class),
 

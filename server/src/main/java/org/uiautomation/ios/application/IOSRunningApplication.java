@@ -15,9 +15,10 @@
 package org.uiautomation.ios.application;
 
 import com.google.common.collect.ImmutableList;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.WebDriverException;
 import org.uiautomation.ios.IOSCapabilities;
 import org.uiautomation.ios.communication.device.DeviceType;
@@ -85,36 +86,37 @@ public class IOSRunningApplication {
     }
   }
 
-  public JSONObject getTranslations(String name) throws JSONException {
-    JSONObject l10n = new JSONObject();
-    l10n.put("matches", 0);
+  public JsonObject getTranslations(String name) {
+    JsonObject l10n = new JsonObject();
+    l10n.addProperty ("matches", 0);
     if (name != null && !name.isEmpty() && !"null".equals(name)) {
       try {
         ImmutableList<ContentResult> results = getPotentialMatches(name);
 
         int size = results.size();
+        Gson gson = new Gson ();
         if (size != 0) {
-          l10n.put("matches", size);
-          JSONArray keys = new JSONArray();
+          l10n.addProperty ("matches", size);
+          JsonArray keys = new JsonArray();
           for (ContentResult res : results) {
-            keys.put(res.getKey());
+            keys.add (gson.fromJson (res.getKey (), JsonElement.class));
           }
-          l10n.put("key", keys);
+          l10n.add ("key", keys);
         }
 
-        JSONArray langs = new JSONArray();
+        JsonArray langs = new JsonArray();
         for (AppleLanguage language : underlyingApplication.getSupportedLanguages()) {
-          JSONArray possibleMatches = new JSONArray();
+          JsonArray possibleMatches = new JsonArray();
 
           for (ContentResult res : results) {
-            possibleMatches.put(underlyingApplication.translate(res, language));
+            possibleMatches.add (gson.fromJson (underlyingApplication.translate(res, language), JsonElement.class));
           }
-          JSONObject match = new JSONObject();
-          match.put(language.toString(), possibleMatches);
-          langs.put(match);
+          JsonObject match = new JsonObject();
+          match.add(language.toString(), possibleMatches);
+          langs.add(match);
 
         }
-        l10n.put("langs", langs);
+        l10n.add("langs", langs);
 
       } catch (Exception e) {
         log.log(Level.SEVERE,"cannot find translation",e);

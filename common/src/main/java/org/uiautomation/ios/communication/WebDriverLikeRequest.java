@@ -15,13 +15,18 @@ package org.uiautomation.ios.communication;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class WebDriverLikeRequest {
 
@@ -30,9 +35,9 @@ public class WebDriverLikeRequest {
   // TODO freynaud extract that to a dedicated object to avoid json objects
   // leaking exception
   // everywhere.
-  private JSONObject payload;
+  private JsonObject payload;
 
-  public WebDriverLikeRequest(HttpServletRequest request) throws IOException, JSONException {
+  public WebDriverLikeRequest(HttpServletRequest request) throws IOException {
     method = request.getMethod();
     path = request.getPathInfo();
     String json = null;
@@ -41,29 +46,29 @@ public class WebDriverLikeRequest {
       IOUtils.copy(request.getInputStream(), w, "UTF-8");
       json = w.toString();
     }
-    JSONObject o = new JSONObject();
+      JsonObject o = new JsonObject();
     if (json != null && !json.isEmpty()) {
-      o = new JSONObject(json);
+      o = new Gson ().fromJson (json, JsonElement.class).getAsJsonObject ();
 
     }
     payload = o;
   }
 
-  public WebDriverLikeRequest(String method, Path path, JSONObject payload) {
+  public WebDriverLikeRequest(String method, Path path, JsonObject payload) {
     this.method = method;
     this.path = path.getPath();
     this.payload = payload;
   }
 
   public WebDriverLikeRequest(String method, String path) {
-    this(method, path, new JSONObject());
+    this(method, path, new JsonObject());
   }
 
   public WebDriverLikeRequest(String method, Path path) {
-    this(method, path, new JSONObject());
+    this(method, path, new JsonObject());
   }
 
-  public WebDriverLikeRequest(String method, String path, JSONObject payload) {
+  public WebDriverLikeRequest(String method, String path, JsonObject payload) {
     this.method = method;
     this.path = path;
     this.payload = payload;
@@ -72,11 +77,14 @@ public class WebDriverLikeRequest {
   public WebDriverLikeRequest(String method, Path path, Map<String, ?> params) {
     this.method = method;
     this.path = path.getPath();
-    this.payload = new JSONObject(params);
+    TypeToken<HashMap<String, ?>> token = new TypeToken<HashMap<String, ?>> () {};
+    Gson gson = new Gson ();
+    String result = gson.toJson (params, token.getType ());
+    this.payload = gson.fromJson (result, JsonElement.class).getAsJsonObject ();
   }
 
   public boolean hasPayload() {
-    return payload != null && payload.length() != 0;
+    return payload != null && payload.entrySet ().size () != 0;
   }
 
   public String toString() {
@@ -87,16 +95,17 @@ public class WebDriverLikeRequest {
     return res;
   }
 
-  public String toJSON() throws JSONException {
+  public String toJSON() {
     return toJSON(0);
   }
 
-  public String toJSON(int i) throws JSONException {
-    JSONObject o = new JSONObject();
-    o.put("method", method);
-    o.put("path", path);
-    o.put("payload", payload);
-    return o.toString(i);
+  public String toJSON(int i)  {
+    JsonObject o = new JsonObject();
+    o.addProperty ("method", method);
+    o.addProperty ("path", path);
+    o.add ("payload", payload);
+    Gson gson = new GsonBuilder ().setPrettyPrinting ().create ();
+    return gson.toJson (o);
   }
 
   public String getMethod() {
@@ -107,7 +116,7 @@ public class WebDriverLikeRequest {
     return path;
   }
 
-  public JSONObject getPayload() {
+  public JsonObject getPayload() {
     return payload;
   }
 

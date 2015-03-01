@@ -13,7 +13,10 @@
  */
 package org.uiautomation.ios.client.uiamodels.impl.configuration;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import org.uiautomation.ios.UIAModels.configuration.CommandConfiguration;
 import org.uiautomation.ios.client.uiamodels.impl.RemoteIOSDriver;
 import org.uiautomation.ios.communication.Path;
@@ -39,7 +42,11 @@ public class RemoteCommandConfiguration implements CommandConfiguration {
   @Override
   public void set(String key, Object value) {
     try {
-      JSONObject payload = new JSONObject().put(key, value);
+      Gson gson = new Gson ();
+      String text = gson.toJson (value, new TypeToken<Object> (){}.getType ());
+      JsonElement jsonElement = gson.fromJson (text, JsonElement.class);
+      JsonObject payload = new JsonObject();
+      payload.add (key, jsonElement);
       Path p = new Path(WebDriverLikeCommand.CONFIGURE);
       // session/:sessionId/configure/command/:command
       p.validateAndReplace(":sessionId", driver.getSessionId().toString());

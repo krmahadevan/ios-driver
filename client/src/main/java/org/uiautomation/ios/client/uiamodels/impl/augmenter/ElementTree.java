@@ -14,11 +14,11 @@
 
 package org.uiautomation.ios.client.uiamodels.impl.augmenter;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.io.File;
 
 public interface ElementTree {
 
-  public JSONObject logElementTree(File screenshot, boolean translation);
+  public JsonObject logElementTree(File screenshot, boolean translation);
 }

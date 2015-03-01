@@ -14,8 +14,7 @@
 
 package org.uiautomation.ios.command;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.remote.Response;
 import org.uiautomation.ios.IOSServerManager;
 import org.uiautomation.ios.ServerSideSession;
@@ -131,10 +130,11 @@ public abstract class BaseCommandHandler implements Handler {
     return res != null ? res : defaultValue;
   }
 
-  public abstract JSONObject configurationDescription() throws JSONException;
+  public abstract JsonObject configurationDescription() ;
 
-  protected JSONObject noConfigDefined() throws JSONException {
-    JSONObject res = new JSONObject().put("No config for this command", "");
+  protected JsonObject noConfigDefined() {
+    JsonObject res = new JsonObject();
+    res.addProperty ("No config for this command", "");
     return res;
   }
 

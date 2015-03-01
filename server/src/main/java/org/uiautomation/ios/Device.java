@@ -14,9 +14,8 @@
 
 package org.uiautomation.ios;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonNull;
 import org.uiautomation.ios.application.APPIOSApplication;
 
 import java.util.ArrayList;
@@ -95,20 +94,15 @@ public abstract class Device {
   private static List<String> toList(Object object) {
     List<String> list = new ArrayList<String>();
 
-    if (object == null || object == JSONObject.NULL) {
+    if (object == null || object == JsonNull.INSTANCE) {
       return null;
     }
 
     if (object instanceof List) {
       return ((List<String>) object);
-    } else if (object instanceof JSONArray) {
-      for (int i = 0; i < ((JSONArray) object).length(); i++) {
-        try {
-          list.add(String.valueOf((((JSONArray) object).get(i))));
-        } catch (JSONException ex) {
-          //issue converting the list. return null
-          return null;
-        }
+    } else if (object instanceof JsonArray) {
+      for (int i = 0; i < ((JsonArray) object).size (); i++) {
+          list.add(String.valueOf((((JsonArray) object).get(i))));
       }
     } else {
       list.add(object.toString());

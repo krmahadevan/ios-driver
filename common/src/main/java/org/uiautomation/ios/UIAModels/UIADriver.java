@@ -13,7 +13,7 @@
  */
 package org.uiautomation.ios.UIAModels;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchElementException;
@@ -34,7 +34,7 @@ public interface UIADriver extends DriverConfiguration {
 
   public IOSCapabilities getCapabilities() throws Exception;
 
-  public JSONObject logElementTree(File screenshot, boolean translation) throws WebDriverException;
+  public JsonObject logElementTree(File screenshot, boolean translation) throws WebDriverException;
 
   public void quit();
 

@@ -16,7 +16,7 @@ package org.uiautomation.ios.UIAModels;
 import java.io.File;
 import java.util.List;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.uiautomation.ios.UIAModels.predicate.Criteria;
@@ -50,6 +50,6 @@ public interface UIAElement extends WebElement{
 
   public String getValue();
 
-  public JSONObject logElementTree(File screenshot, boolean translation) throws Exception;
+  public JsonObject logElementTree(File screenshot, boolean translation) throws Exception;
 
 }

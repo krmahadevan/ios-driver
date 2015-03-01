@@ -13,7 +13,7 @@
  */
 package org.uiautomation.ios.UIAModels.predicate;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.WebDriverException;
 
 /**
@@ -22,9 +22,8 @@ import org.openqa.selenium.WebDriverException;
  */
 public class EmptyCriteria extends DecorableCriteria {
 
-  public JSONObject stringify(){
-    JSONObject res = new JSONObject();
-    return res;
+  public JsonObject stringify(){
+    return new JsonObject();
   }
 
   @Override

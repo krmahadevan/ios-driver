@@ -16,9 +16,8 @@ package org.uiautomation.ios.UIAModels.predicate;
 import java.util.Arrays;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.WebDriverException;
 
 public abstract class ComposedCriteria extends DecorableCriteria {
@@ -37,18 +36,14 @@ public abstract class ComposedCriteria extends DecorableCriteria {
     this.type = t;
   }
 
-  public JSONObject stringify()  {
-    JSONObject res = new JSONObject();
-    JSONArray or = new JSONArray();
+  public JsonObject stringify()  {
+    JsonObject res = new JsonObject();
+    JsonArray or = new JsonArray();
     for (Criteria c : criterias) {
-      or.put(c.stringify());
+      or.add(c.stringify());
     }
-    try {
-      res.put(type.toString(), or);
-    }catch (JSONException e) {
-      throw new WebDriverException(e);
-    }
-   
+    res.add(type.toString(), or);
+
     return res;
   }
 

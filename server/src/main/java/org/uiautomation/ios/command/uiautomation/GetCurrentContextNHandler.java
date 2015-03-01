@@ -13,8 +13,7 @@
  */
 package org.uiautomation.ios.command.uiautomation;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.remote.Response;
 import org.uiautomation.ios.UIAModels.configuration.WorkingMode;
 import org.uiautomation.ios.communication.WebDriverLikeRequest;
@@ -43,7 +42,7 @@ public class GetCurrentContextNHandler extends BaseNativeCommandHandler {
   }
 
   @Override
-  public JSONObject configurationDescription() throws JSONException {
+  public JsonObject configurationDescription()  {
     return noConfigDefined();
   }
 }

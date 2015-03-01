@@ -14,12 +14,11 @@
 package org.uiautomation.ios;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -29,10 +28,10 @@ import org.uiautomation.ios.communication.device.DeviceType;
 import org.uiautomation.ios.communication.device.DeviceVariation;
 
 import javax.xml.bind.DatatypeConverter;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 public class IOSCapabilities extends DesiredCapabilities {
@@ -105,22 +104,22 @@ public class IOSCapabilities extends DesiredCapabilities {
     setCapability(CapabilityType.PLATFORM, Platform.MAC);
   }
 
-  public IOSCapabilities(JSONObject json) throws JSONException {
-    Iterator<String> iter = json.keys();
-    while (iter.hasNext()) {
-      String key = iter.next();
-      Object value = json.get(key);
-      if (BROWSER_NAME.equalsIgnoreCase(key) && json.isNull(BUNDLE_NAME)) {
-        setCapability(BUNDLE_NAME, "Safari");
-        if (((String) value).equalsIgnoreCase("iphone")) {
-          setCapability(DEVICE, "iphone");
-        } else if (((String) value).equalsIgnoreCase("ipad")) {
-          setCapability(DEVICE, "ipad");
-        }
-      } else {
-        setCapability(key, decode(value));
+  public IOSCapabilities(JsonObject json)  {
+      for (Entry<String, JsonElement> eachEntry : json.entrySet ()) {
+          String key = eachEntry.getKey ();
+          JsonElement value = eachEntry.getValue ();
+          if (BROWSER_NAME.equalsIgnoreCase (key) && json.get (BUNDLE_NAME).isJsonNull ()) {
+              setCapability (BUNDLE_NAME, "Safari");
+              if ("iphone".equalsIgnoreCase (value.getAsString ())) {
+                  setCapability (DEVICE, "iphone");
+              } else if ("ipad".equalsIgnoreCase (value.getAsString ())) {
+                  setCapability (DEVICE, "ipad");
+              }
+          } else {
+              setCapability (key, decode (value));
+          }
+
       }
-    }
   }
 
   public IOSCapabilities(Map<String, ?> from) {
@@ -188,18 +187,18 @@ public class IOSCapabilities extends DesiredCapabilities {
     return ((String) o);
   }
 
-  private Object decode(Object o) throws JSONException {
-    if (o instanceof JSONArray) {
-      List<Object> res = new ArrayList<Object>();
-      JSONArray array = (JSONArray) o;
-      for (int i = 0; i < array.length(); i++) {
-        Object r = array.get(i);
-        res.add(decode(r));
+  private Object decode(Object o) {
+      if (o instanceof JsonArray) {
+          List<Object> res = new ArrayList<> ();
+          JsonArray array = ((JsonArray) o).getAsJsonArray ();
+          for (int i =0 ; i < array.size (); i ++) {
+              Object r = array.get (i);
+              res.add (decode (r));
+          }
+          return res;
+      } else {
+          return o;
       }
-      return res;
-    } else {
-      return o;
-    }
   }
 
   public Map<String, Object> getRawCapabilities() {
@@ -207,12 +206,12 @@ public class IOSCapabilities extends DesiredCapabilities {
   }
 
   public List<DeviceType> getSupportedDevicesFromDeviceFamily() {
-    JSONArray o = (JSONArray) asMap().get(DEVICE_FAMILLY);
+      JsonArray o = (JsonArray) asMap().get(DEVICE_FAMILLY);
     List<DeviceType> devices = new ArrayList<>();
-    for (int i = 0; i < o.length(); i++) {
+    for (int i = 0; i < o.size (); i++) {
       try {
-        devices.add(DeviceType.getFromFamilyCode(o.getInt(i)));
-      } catch (JSONException e) {
+        devices.add(DeviceType.getFromFamilyCode(o.get(i).getAsInt ()));
+      } catch (ClassCastException | IllegalArgumentException e) {
         throw new WebDriverException(o.toString() + " but should contain only 1 or 2.");
       }
     }
@@ -278,23 +277,20 @@ public class IOSCapabilities extends DesiredCapabilities {
   }
 
   public Map<String, byte[]> getBootstrapFiles() {
-    JSONObject o = (JSONObject) getRawCapabilities().get(BOOTSTRAP_FILES);
+    JsonObject o = (JsonObject) getRawCapabilities().get(BOOTSTRAP_FILES);
     if (o == null) {
       return new HashMap<String, byte[]>();
     }
 
     Map<String, byte[]> files = new HashMap<String, byte[]>();
-    for (Iterator<String> pathsIter = o.keys(); pathsIter.hasNext();) {
-      String path = pathsIter.next();
-      String base64Content;
-      try {
-        base64Content = o.getString(path);
-      } catch (JSONException e) {
-        throw new WebDriverException(o.toString() + " should only contain base64 encoded strings for values.");
-      }
-      files.put(path, DatatypeConverter.parseBase64Binary(base64Content));
+    for (Entry<String, JsonElement> eachEntry : o.entrySet ()) {
+        try {
+            String base64Content = eachEntry.getValue ().getAsString ();
+            files.put (eachEntry.getKey (), DatatypeConverter.parseBase64Binary(base64Content));
+        } catch (ClassCastException | IllegalArgumentException e) {
+            throw new WebDriverException(o.toString() + " should only contain base64 encoded strings for values.");
+        }
     }
-
     return files;
   }
 
@@ -321,14 +317,14 @@ public class IOSCapabilities extends DesiredCapabilities {
           return o.toString();
         }
       });
-    } else if (o instanceof JSONArray) {
-      JSONArray a = (JSONArray) o;
+    } else if (o instanceof JsonArray) {
+      JsonArray a = (JsonArray) o;
       List<String> res = new ArrayList<>();
 
-      for (int i = 0; i < a.length(); i++) {
+      for (int i = 0; i < a.size (); i++) {
         try {
-          res.add(a.getString(i));
-        } catch (JSONException e) {
+          res.add(a.get(i).getAsString ());
+        } catch (ClassCastException | IllegalArgumentException e) {
           throw new WebDriverException(e);
         }
       }
@@ -363,7 +359,7 @@ public class IOSCapabilities extends DesiredCapabilities {
   @Override
   public Object getCapability(String key) {
     Object o = getRawCapabilities().get(key);
-    if (o != null && o.equals(JSONObject.NULL)) {
+    if (o != null && o.equals(JsonNull.INSTANCE)) {
       return null;
     } else {
       return o;
@@ -401,15 +397,15 @@ public class IOSCapabilities extends DesiredCapabilities {
     return (String) getCapability(SIMULATOR_SCALE);
   }
 
-  public LoggingPreferences getLoggingPreferences() throws JSONException {
+  public LoggingPreferences getLoggingPreferences()  {
     LoggingPreferences ret = new LoggingPreferences();
-    JSONObject json = (JSONObject) getCapability(CapabilityType.LOGGING_PREFS);
+    JsonObject json = (JsonObject) getCapability(CapabilityType.LOGGING_PREFS);
     if (json != null) {
-      for (Object key : ImmutableList.copyOf(json.keys())) {
-        String logType = (String) key;
-        Level level = Level.parse((String) json.get(logType));
-        ret.enable(logType, level);
-      }
+        for ( Entry<String, JsonElement> eachEntry : json.entrySet ()){
+            String logType = eachEntry.getKey ();
+            Level level = Level.parse (eachEntry.getValue ().getAsString ());
+            ret.enable(logType, level);
+        }
     }
     return ret;
   }

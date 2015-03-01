@@ -14,6 +14,8 @@
 
 package org.uiautomation.ios.client.uiamodels.impl.configuration;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -21,8 +23,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.params.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.BeanToJsonConverter;
 import org.openqa.selenium.remote.ErrorHandler;
@@ -148,11 +148,7 @@ public class WebDriverLikeCommandExecutor {
         return (T) RemoteIOSObject.createObject(driver, map);
       } else if (map.containsKey("tree")) {
         String serialized = new BeanToJsonConverter().convert(o);
-        try {
-          return (T) new JSONObject(serialized);
-        } catch (JSONException e) {
-          throw new WebDriverException("cannot cast");
-        }
+        return (T) new Gson ().fromJson (serialized, JsonElement.class).getAsJsonObject ();
       } else {
         return (T) map;
       }

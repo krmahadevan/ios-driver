@@ -13,7 +13,7 @@
  */
 package org.uiautomation.ios.UIAModels.predicate;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public interface Criteria {
 
@@ -21,5 +21,5 @@ public interface Criteria {
 
   public void addDecorator(CriteriaDecorator decorator);
 
-  public JSONObject stringify();
+  public JsonObject stringify();
 }

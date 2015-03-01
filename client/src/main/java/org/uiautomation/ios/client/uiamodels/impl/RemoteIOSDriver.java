@@ -17,7 +17,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import org.json.JSONObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
@@ -110,7 +111,7 @@ public class RemoteIOSDriver extends RemoteWebDriver
 
 
   @Override
-  public JSONObject logElementTree(File screenshot, boolean translation) throws WebDriverException {
+  public JsonObject logElementTree(File screenshot, boolean translation) throws WebDriverException {
     return RemoteIOSDriver.logElementTree(executor, screenshot, translation);
   }
 
@@ -281,26 +282,30 @@ public class RemoteIOSDriver extends RemoteWebDriver
   }
 
 
-  public static JSONObject logElementTree(WebDriverLikeCommandExecutor executor, File screenshot, boolean translation) {
+  public static JsonObject logElementTree(WebDriverLikeCommandExecutor executor, File screenshot, boolean translation) {
     Map params = ImmutableMap.of("attachScreenshot", screenshot != null, "translation", translation);
     WebDriverLikeRequest request = executor.buildRequest(WebDriverLikeCommand.TREE_ROOT, params);
-    JSONObject log = executor.execute(request);
+    JsonObject log = executor.execute(request);
     if (screenshot != null) {
-      JSONObject screen = log.optJSONObject("screenshot");
-      String content = screen.optString("64encoded");
-      RemoteUIAElement.createFileFrom64EncodedString(screenshot, content);
+      JsonElement ss = log.get ("screenshot");
+      if (ss.isJsonObject ()) {
+        String content = ss.getAsJsonObject ().get ("64encoded").getAsString ();
+        RemoteUIAElement.createFileFrom64EncodedString (screenshot, content);
+      }
     }
     log.remove("screenshot");
     return log;
   }
 
   public static List<UIAElement> findElements(WebDriverLikeCommandExecutor executor, Criteria c) {
-    WebDriverLikeRequest request = executor.buildRequest(WebDriverLikeCommand.ELEMENTS_ROOT, ImmutableMap.of("depth", -1, "criteria", c.stringify()));
+    WebDriverLikeRequest request = executor.buildRequest (WebDriverLikeCommand.ELEMENTS_ROOT,
+        ImmutableMap.of ("depth", - 1, "criteria", c.stringify ()));
     return executor.execute(request);
   }
 
   public static <T extends UIAElement> T findElement(WebDriverLikeCommandExecutor executor, Criteria c) {
-    WebDriverLikeRequest request = executor.buildRequest(WebDriverLikeCommand.ELEMENT_ROOT, ImmutableMap.of("depth", -1, "criteria", c.stringify()));
+    WebDriverLikeRequest request = executor.buildRequest (WebDriverLikeCommand.ELEMENT_ROOT,
+        ImmutableMap.of ("depth", - 1, "criteria", c.stringify ()));
     return executor.execute(request);
   }
 

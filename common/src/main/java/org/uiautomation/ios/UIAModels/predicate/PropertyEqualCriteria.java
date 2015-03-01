@@ -13,9 +13,11 @@
  */
 package org.uiautomation.ios.UIAModels.predicate;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.openqa.selenium.WebDriverException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 public abstract class PropertyEqualCriteria extends DecorableCriteria {
 
@@ -37,16 +39,15 @@ public abstract class PropertyEqualCriteria extends DecorableCriteria {
     this.matchingStrategy = matchingStrategy;
   }
 
-  public JSONObject stringify() {
-    JSONObject res = new JSONObject();
-    try {
-      res.put("method", propertyName);
-      res.put("expected", value);
-      res.put("l10n", l10nstrategy);
-      res.put("matching", matchingStrategy);
-    } catch (JSONException e) {
-      throw new WebDriverException(e);
-    }
+  public JsonObject stringify() {
+    JsonObject res = new JsonObject ();
+    Gson gson = new GsonBuilder ().create ();
+    String l10n = gson.toJson (l10nstrategy, new TypeToken<L10NStrategy> () { }.getType ());
+    String match = gson.toJson (matchingStrategy, new TypeToken<MatchingStrategy> () { }.getType ());
+    res.addProperty ("method", propertyName);
+    res.addProperty ("expected", value);
+    res.add ("l10n", gson.fromJson (l10n, JsonElement.class));
+    res.add ("matching", gson.fromJson (match, JsonElement.class));
     return res;
   }
 

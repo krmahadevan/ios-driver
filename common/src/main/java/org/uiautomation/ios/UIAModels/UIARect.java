@@ -13,8 +13,7 @@
  */
 package org.uiautomation.ios.UIAModels;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class UIARect {
 
@@ -31,14 +30,14 @@ public class UIARect {
 
   }
 
-  public UIARect(JSONObject o) throws JSONException {
-    JSONObject origin = o.getJSONObject("origin");
-    x = origin.getInt("x");
-    y = origin.getInt("y");
+  public UIARect(JsonObject o)  {
+    JsonObject origin = o.getAsJsonObject ("origin");
+    x = origin.get("x").getAsInt ();
+    y = origin.get("y").getAsInt ();
 
-    JSONObject size = o.getJSONObject("size");
-    height = size.getInt("height");
-    width = size.getInt("width");
+      JsonObject size = o.getAsJsonObject("size");
+    height = size.get("height").getAsInt ();
+    width = size.get("width").getAsInt ();
   }
 
   public String toString() {
